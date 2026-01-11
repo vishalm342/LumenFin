@@ -1,17 +1,34 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
-// Define protected routes - everything under /dashboard and /api
-const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
-  '/api(.*)',
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
-  // Protect dashboard and API routes
-  if (isProtectedRoute(req)) {
+const isAuthRoute = createRouteMatcher([
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+]);
+
+export const proxy = clerkMiddleware(async (auth, req) => {
+  const { userId } = await auth();
+
+  // If user is authenticated and trying to access auth pages, redirect to dashboard
+  if (userId && isAuthRoute(req)) {
+    return NextResponse.redirect(new URL('/dashboard', req.url));
+  }
+
+  // Protect all non-public routes
+  if (!isPublicRoute(req)) {
     await auth.protect();
   }
+
+  return NextResponse.next();
 });
+
+export default proxy;
 
 export const config = {
   matcher: [
