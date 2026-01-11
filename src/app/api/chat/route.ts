@@ -1,120 +1,85 @@
 import { createCerebras } from '@ai-sdk/cerebras';
 import { streamText } from 'ai';
-import connectDB from '@/lib/mongodb';
-import Document from '@/models/Document';
+import { auth } from '@clerk/nextjs/server';
+import { searchFinancialChunks } from '@/lib/vectorstore';
 
+// Initialize Cerebras with explicit key check
 const cerebras = createCerebras({
-  apiKey: process.env.CEREBRAS_API_KEY!,
+  apiKey: process.env.CEREBRAS_API_KEY,
 });
-
-// Simple function to generate embeddings for the query
-// In production, you'd want to use the same embedding model as during ingestion
-async function generateQueryEmbedding(query: string): Promise<number[]> {
-  // For now, we'll use a simple approach - in production, use OpenAI embeddings or similar
-  // This is a placeholder that creates a dummy embedding
-  // TODO: Replace with actual embedding generation using the same model as ingestion
-  const words = query.toLowerCase().split(' ');
-  const embedding = new Array(1536).fill(0);
-  
-  // Simple hash-based approach for demo
-  for (let i = 0; i < words.length; i++) {
-    const word = words[i];
-    for (let j = 0; j < word.length; j++) {
-      const idx = (word.charCodeAt(j) * (i + 1)) % 1536;
-      embedding[idx] += 0.1;
-    }
-  }
-  
-  // Normalize
-  const magnitude = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0));
-  return embedding.map(val => val / (magnitude || 1));
-}
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    if (!process.env.CEREBRAS_API_KEY) {
+      throw new Error('CEREBRAS_API_KEY is not set');
+    }
     
-    if (!messages || messages.length === 0) {
-      return new Response('Messages are required', { status: 400 });
+    const { userId } = await auth();
+    if (!userId) return new Response('Unauthorized', { status: 401 });
+
+    const { messages } = await req.json();
+    if (!messages?.length) return new Response('No messages', { status: 400 });
+
+    const lastMessage = messages[messages.length - 1];
+    console.log('Last message structure:', JSON.stringify(lastMessage, null, 2));
+    
+    // Extract user query with comprehensive handling
+    let userQuery = '';
+    
+    if (typeof lastMessage.content === 'string') {
+      userQuery = lastMessage.content;
+    } else if (Array.isArray(lastMessage.content)) {
+      // Handle array of parts (multimodal messages)
+      userQuery = lastMessage.content
+        .filter((part: any) => part.type === 'text' || part.text)
+        .map((part: any) => part.text || part.content || '')
+        .join(' ');
+    } else if (lastMessage.content && typeof lastMessage.content === 'object') {
+      // Handle object with text property
+      userQuery = (lastMessage.content as any).text || '';
+    }
+    
+    userQuery = userQuery.trim();
+    console.log('Extracted user query:', userQuery);
+    
+    if (!userQuery) {
+      return new Response(
+        JSON.stringify({ error: 'No valid query text found in message' }), 
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Get the latest user message for RAG retrieval
-    const lastMessage = messages[messages.length - 1];
-    const userQuery = lastMessage.content;
+    // Step 1: MongoDB Atlas Vector Search retrieval
+    const relevantChunks = await searchFinancialChunks(userQuery, userId, 4);
 
-    // Connect to MongoDB
-    await connectDB();
+    // Step 2: Context Preparation with Citation Metadata
+    const context = relevantChunks.length > 0 
+      ? relevantChunks.map((chunk, idx) => 
+          `[Source ${idx + 1}: ${chunk.metadata.fileName}, Page ${chunk.metadata.pageNumber}]\n${chunk.content}`
+        ).join('\n\n')
+      : "No relevant documents found.";
 
-    // Step 1: Convert query to embedding
-    const queryEmbedding = await generateQueryEmbedding(userQuery);
+    // Step 3: Strict System Instruction
+    const systemPrompt = `You are a Precise Financial Analyst. 
+    CONTEXT: ${context}
+    RULES: Answer ONLY using the context. Cite sources like [Source X: file.pdf, Page Y]. 
+    If not in context, say you don't have enough info. Be precise with metrics.`;
 
-    // Step 2: Search MongoDB for similar chunks using vector search
-    // Note: This requires MongoDB Atlas with a vector search index configured
-    // For basic similarity, we'll use cosine similarity in-memory
-    const allDocuments = await Document.find({}).limit(100).lean();
-    
-    // Calculate cosine similarity for each document
-    const documentsWithScores = allDocuments.map((doc: any) => {
-      const docEmbedding = doc.embedding;
-      
-      // Cosine similarity
-      let dotProduct = 0;
-      let docMagnitude = 0;
-      let queryMagnitude = 0;
-      
-      for (let i = 0; i < Math.min(docEmbedding.length, queryEmbedding.length); i++) {
-        dotProduct += docEmbedding[i] * queryEmbedding[i];
-        docMagnitude += docEmbedding[i] * docEmbedding[i];
-        queryMagnitude += queryEmbedding[i] * queryEmbedding[i];
-      }
-      
-      const similarity = dotProduct / (Math.sqrt(docMagnitude) * Math.sqrt(queryMagnitude));
-      
-      return {
-        content: doc.content,
-        metadata: doc.metadata,
-        similarity,
-      };
-    });
-
-    // Sort by similarity and take top 5 chunks
-    const topChunks = documentsWithScores
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, 5);
-
-    // Step 3: Format context for the LLM
-    const context = topChunks.length > 0
-      ? topChunks.map((chunk, idx) => `[Document ${idx + 1}]\n${chunk.content}`).join('\n\n')
-      : 'No relevant documents found.';
-
-    // Step 4: Create system message with context
-    const systemMessage = {
-      role: 'system',
-      content: `You are a financial analysis assistant. Use the following context from uploaded documents to answer the user's question. If the context doesn't contain relevant information, say so.
-
-Context:
-${context}
-
-Instructions:
-- Provide clear, concise financial analysis
-- Cite specific information from the context when possible
-- If the context doesn't contain the answer, acknowledge that
-- Format numbers and financial data clearly`,
-    };
-
-    // Step 5: Stream response from Cerebras using llama-3.3-70b
-    const result = streamText({
+    // Step 4: Sub-second inference with Llama-3.3-70b
+    const result = await streamText({
       model: cerebras('llama-3.3-70b'),
-      messages: [systemMessage, ...messages],
-      temperature: 0.7,
+      system: systemPrompt, // Correct way to pass system prompt in v4
+      messages,
+      temperature: 0.1, // Near-zero for extreme financial accuracy
     });
 
+    // IMPORTANT: Return the stream response
+    // Using toTextStreamResponse() as toDataStreamResponse() is not recognized by the current type definitions
     return result.toTextStreamResponse();
+
   } catch (error) {
     console.error('Chat API Error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to process chat request' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: `Inference failed: ${errorMessage}` }), { status: 500 });
   }
 }
