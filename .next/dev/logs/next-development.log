@@ -1,1 +1,65 @@
-[00:16:27.862] Server  LOG     ✓ Compiled in 179ms
+[00:00:01.663] Server  LOG     ✓ Ready in 1321ms
+[00:00:11.030] Server  LOG     ○ Compiling / ...
+[00:00:12.774] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:13.560] Browser WARN    Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[00:00:19.366] Server  LOG     ○ Compiling /dashboard ...
+[02:14:06.143] Server  ERROR   Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:14:06.233] Server  ERROR   ⨯ "unhandledRejection:" Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:14:06.245] Server  ERROR   ⨯ "unhandledRejection: " Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:14:06.631] Server  ERROR   ⨯ Error: The Middleware file "/middleware" must export a function named `middleware` or a default function.
+[02:14:06.643] Server  LOG     ✓ Compiled in 694ms
+[02:14:06.688] Server  ERROR   ⨯ Error: The Middleware file "/middleware" must export a function named `middleware` or a default function.
+[02:14:06.697] Server  ERROR   ⨯ Error: The Middleware file "/middleware" must export a function named `middleware` or a default function.
+[02:14:06.704] Server  ERROR   ⨯ Error: The Middleware file "/middleware" must export a function named `middleware` or a default function.
+[02:14:06.713] Server  ERROR   ⨯ Error: The Middleware file "/middleware" must export a function named `middleware` or a default function.
+[02:14:06.718] Server  ERROR   ⨯ Error: The Middleware file "/middleware" must export a function named `middleware` or a default function.
+[02:14:07.013] Server  ERROR   Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:14:07.018] Server  ERROR   ⨯ "unhandledRejection:" Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:14:07.024] Server  ERROR   ⨯ "unhandledRejection: " Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:14:07.642] Server  LOG     ✓ Compiled in 966ms
+[02:14:07.712] Browser ERROR   ./src/middleware.ts
+Middleware is missing expected function export name
+This function is what Next.js runs for every request handled by this middleware.
+
+Why this happens:
+- The file exists but doesn't export a function.
+- The export is not a function (e.g., an object or constant).
+- There's a syntax error preventing the export from being recognized.
+
+To fix it:
+- Ensure this file has either a default or "middleware" function export.
+
+Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:14:09.999] Browser ERROR   Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. {}
+[02:14:09.999] Browser ERROR   Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. {}
+[02:14:09.999] Browser ERROR   Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. {}
+[02:14:09.999] Browser ERROR   Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. {}
+[02:14:09.999] Browser ERROR   Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. {}
+[02:14:09.999] Browser ERROR   Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. {}
+[02:14:09.999] Browser ERROR   Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. {}
+[02:14:09.999] Browser ERROR   Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. {}
+[02:14:09.999] Browser ERROR   Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. {}
+[02:14:10.000] Browser ERROR   Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. {}
+[02:14:10.000] Browser ERROR   Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. {}
+[02:14:10.000] Browser ERROR   Failed to fetch RSC payload for http://localhost:3000/dashboard. Falling back to browser navigation. {}
+[02:14:12.207] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:14:13.999] Browser WARN    Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[02:14:20.234] Server  ERROR   Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:14:20.241] Server  ERROR   ⨯ "unhandledRejection:" Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:14:20.247] Server  ERROR   ⨯ "unhandledRejection: " Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:15:04.893] Server  ERROR   Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:15:04.899] Server  ERROR   ⨯ "unhandledRejection:" Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:15:04.904] Server  ERROR   ⨯ "unhandledRejection: " Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:15:07.578] Server  ERROR   Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:15:07.588] Server  ERROR   ⨯ "unhandledRejection:" Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:15:07.599] Server  ERROR   ⨯ "unhandledRejection: " Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:15:20.859] Server  ERROR   Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:15:20.869] Server  ERROR   ⨯ "unhandledRejection:" Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:15:20.879] Server  ERROR   ⨯ "unhandledRejection: " Error: Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected. Please use "./src/proxy.ts" only. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:15:30.732] Server  WARN    ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[02:18:52.822] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:18:53.104] Browser WARN    Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview
+[05:31:56.440] Server  LOG       Reload env: .env.local
+[08:53:22.513] Server  LOG     ✓ Compiled in 51ms
+[08:55:52.417] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[08:55:52.842] Browser WARN    Clerk: Clerk has been loaded with development keys. Development instances have strict usage limits and should not be used when deploying your application to production. Learn more: https://clerk.com/docs/deployments/overview

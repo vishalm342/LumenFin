@@ -10,8 +10,12 @@ const cerebras = createCerebras({
 
 export async function POST(req: Request) {
   try {
+    // Validate required environment variables
     if (!process.env.CEREBRAS_API_KEY) {
       throw new Error('CEREBRAS_API_KEY is not set');
+    }
+    if (!process.env.CLERK_SECRET_KEY) {
+      throw new Error('CLERK_SECRET_KEY is not set');
     }
     
     const { userId } = await auth();

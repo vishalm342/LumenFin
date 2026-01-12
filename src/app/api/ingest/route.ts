@@ -50,7 +50,10 @@ export async function POST(req: Request) {
       modelName: 'text-embedding-004',
     });
 
+    // Debug logging for Vercel deployment tracking
+    console.log('Connecting to DB...');
     const { db } = await connectDB();
+    console.log('DB connection successful');
     const collection = db.collection('financial_chunks');
 
     // Step 5: Batch Processing
@@ -73,8 +76,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, message: `Indexed ${chunks.length} chunks.` });
 
   } catch (error) {
+    // Enhanced error logging for Vercel debugging
     console.error('Ingestion Error:', error);
-    return NextResponse.json({ error: 'Failed to process PDF' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : 'No stack trace';
+    console.error('Error details:', { message: errorMessage, stack: errorStack });
+    return NextResponse.json({ 
+      error: 'Failed to process PDF', 
+      details: errorMessage 
+    }, { status: 500 });
   }
 }
 
