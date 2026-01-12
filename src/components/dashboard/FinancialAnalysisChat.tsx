@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, User, Sparkles, Loader2, AlertCircle, FileText, Plus, MessageSquare, Trash2, Menu, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Send, User, Sparkles, Loader2, AlertCircle, FileText, Plus, MessageSquare, Trash2, Menu, X, Pin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import ChatActionMenu from './ChatActionMenu';
 import { useChat, UIMessage } from '@ai-sdk/react';
 import {
   Dialog,
@@ -25,6 +27,7 @@ interface ChatSession {
   title: string;
   messages: UIMessage[];
   timestamp: number;
+  isPinned?: boolean;
 }
 
 function SourceBadge({ citation, onClick }: { citation: string; onClick: () => void }) {
@@ -46,11 +49,31 @@ interface FinancialAnalysisChatProps {
 }
 
 export default function FinancialAnalysisChat({ currentChatId, onChatIdChange }: FinancialAnalysisChatProps) {
+  const router = useRouter();
   const [input, setInput] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const prevMessagesLengthRef = useRef<number>(0);
+
+  // Initialize useChat hook first (must be before useEffects that use setMessages)
+  const { 
+    messages, 
+    status,
+    setMessages,
+    error 
+  } = useChat({
+    onError: (error: Error) => {
+      console.error("Chat error:", error);
+    }
+  });
+
+  // CRITICAL: Reset state immediately when chatId changes to prevent stale messages
+  useEffect(() => {
+    setMessages([]);
+    setInput('');
+    prevMessagesLengthRef.current = 0;
+  }, [currentChatId, setMessages]);
 
   // Load input from localStorage on mount
   useEffect(() => {
@@ -64,17 +87,6 @@ export default function FinancialAnalysisChat({ currentChatId, onChatIdChange }:
   useEffect(() => {
     localStorage.setItem(`lumenfin_chat_input_${currentChatId}`, input);
   }, [input, currentChatId]);
-
-  const { 
-    messages, 
-    status,
-    setMessages,
-    error 
-  } = useChat({
-    onError: (error: Error) => {
-      console.error("Chat error:", error);
-    }
-  });
 
   // Load all chat sessions from localStorage
   useEffect(() => {
@@ -232,11 +244,33 @@ export default function FinancialAnalysisChat({ currentChatId, onChatIdChange }:
     }
   };
   
+  const handleRenameChat = (chatId: string, newTitle: string) => {
+    const updatedSessions = chatSessions.map(session => 
+      session.id === chatId ? { ...session, title: newTitle } : session
+    );
+    setChatSessions(updatedSessions);
+    localStorage.setItem('lumenfin_chat_sessions', JSON.stringify(updatedSessions));
+  };
+
+  const handlePinChat = (chatId: string) => {
+    const updatedSessions = chatSessions.map(session => 
+      session.id === chatId ? { ...session, isPinned: !session.isPinned } : session
+    );
+    setChatSessions(updatedSessions);
+    localStorage.setItem('lumenfin_chat_sessions', JSON.stringify(updatedSessions));
+  };
+
   const handleNewChat = () => {
+    // Explicitly reset all chat state
+    setMessages([]);
+    setInput('');
+    prevMessagesLengthRef.current = 0;
+    
     // Check if current chat is already empty and untitled
     const currentSession = chatSessions.find(s => s.id === currentChatId);
     if (currentSession && currentSession.title === 'New Chat' && currentSession.messages.length === 0) {
-      // Don't create a new chat if the current one is already empty
+      // If current chat is empty, no need to create new one, just ensure state is clean
+      localStorage.removeItem(`lumenfin_chat_input_${currentChatId}`);
       return;
     }
     
@@ -245,32 +279,68 @@ export default function FinancialAnalysisChat({ currentChatId, onChatIdChange }:
       id: newChatId,
       title: 'New Chat',
       messages: [],
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      isPinned: false
     };
     
     const updatedSessions = [newSession, ...chatSessions];
     setChatSessions(updatedSessions);
     localStorage.setItem('lumenfin_chat_sessions', JSON.stringify(updatedSessions));
+    
+    localStorage.removeItem(`lumenfin_chat_input_${newChatId}`);
+    
+    // Switch to new chat (this will trigger the reset useEffect)
     onChatIdChange(newChatId);
-    setMessages([]);
-    prevMessagesLengthRef.current = 0;
+    
+    // Navigate if needed (optional based on where this component is used)
+    // router.push(`/dashboard/chat?id=${newChatId}`); 
   };
 
-  const handleDeleteChat = (chatId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    // Prevent deleting the last chat
-    if (chatSessions.length <= 1) {
-      return;
-    }
-    
+  const handleDeleteChat = async (chatId: string) => {
+    // Optimistic UI updates - remove immediately from state
     const updatedSessions = chatSessions.filter(s => s.id !== chatId);
     setChatSessions(updatedSessions);
     localStorage.setItem('lumenfin_chat_sessions', JSON.stringify(updatedSessions));
+    localStorage.removeItem(`lumenfin_chat_input_${chatId}`);
     
-    // Switch to another chat if we deleted the current one
-    if (chatId === currentChatId && updatedSessions.length > 0) {
-      onChatIdChange(updatedSessions[0].id);
+    // If deleting active chat or last chat handling
+    if (chatId === currentChatId) {
+      setMessages([]);
+      setInput('');
+      prevMessagesLengthRef.current = 0;
+      
+      if (updatedSessions.length > 0) {
+        onChatIdChange(updatedSessions[0].id);
+      } else {
+        // Create a default new chat if all deleted
+        const newChatId = 'default';
+        const newSession = {
+          id: newChatId,
+          title: 'New Chat',
+          messages: [],
+          timestamp: Date.now(),
+          isPinned: false
+        };
+        setChatSessions([newSession]);
+        localStorage.setItem('lumenfin_chat_sessions', JSON.stringify([newSession]));
+        onChatIdChange(newChatId);
+      }
+    }
+
+    try {
+      // Call API to delete from backend if it wasn't a local-only chat (optional check)
+      if (!chatId.startsWith('chat_') && chatId !== 'default') {
+        const response = await fetch(`/api/chat/${chatId}`, {
+          method: 'DELETE',
+        });
+        
+        if (!response.ok) {
+           console.error('Failed to delete chat from server');
+           // Could revert UI state here if strict consistency is needed
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting chat:', error);
     }
   };
   
@@ -343,7 +413,12 @@ export default function FinancialAnalysisChat({ currentChatId, onChatIdChange }:
             {/* Chat History List */}
             <ScrollArea className="flex-1 p-2">
               <div className="space-y-1">
-                {chatSessions.map((session) => (
+                {[...chatSessions]
+                  .sort((a, b) => {
+                    if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+                    return b.timestamp - a.timestamp;
+                  })
+                  .map((session) => (
                   <div
                     key={session.id}
                     onClick={() => onChatIdChange(session.id)}
@@ -353,23 +428,20 @@ export default function FinancialAnalysisChat({ currentChatId, onChatIdChange }:
                         : 'text-slate-400 hover:bg-[#1e293b]/50 hover:text-white'
                     }`}
                   >
-                    <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                    {session.isPinned ? (
+                      <Pin className="w-4 h-4 flex-shrink-0 text-[#10b981] rotate-45" />
+                    ) : (
+                      <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                    )}
                     <span className="flex-1 text-sm truncate">{session.title}</span>
-                    <button
-                      onClick={(e) => handleDeleteChat(session.id, e)}
-                      disabled={chatSessions.length <= 1}
-                      className={`opacity-0 group-hover:opacity-100 p-1.5 rounded transition-all flex-shrink-0 ${
-                        chatSessions.length <= 1 
-                          ? 'cursor-not-allowed opacity-30 hover:bg-transparent' 
-                          : 'hover:bg-red-500/20'
-                      }`}
-                      aria-label={`Delete ${session.title}`}
-                      title={chatSessions.length <= 1 ? 'Cannot delete the last chat' : 'Delete chat'}
-                    >
-                      <Trash2 className={`w-3.5 h-3.5 ${
-                        chatSessions.length <= 1 ? 'text-slate-600' : 'text-red-400'
-                      }`} />
-                    </button>
+                    <ChatActionMenu
+                      chatId={session.id}
+                      currentTitle={session.title}
+                      isPinned={!!session.isPinned}
+                      onRename={handleRenameChat}
+                      onPin={handlePinChat}
+                      onDelete={handleDeleteChat}
+                    />
                   </div>
                 ))}
               </div>
@@ -379,7 +451,7 @@ export default function FinancialAnalysisChat({ currentChatId, onChatIdChange }:
       </aside>
 
       {/* Main Chat Area */}
-      <div className="flex-1 p-6 flex flex-col overflow-hidden">
+      <div className="flex-1 p-6 flex flex-col overflow-hidden" key={currentChatId}>
         <div className="h-full w-full flex flex-col">
           <div className="bg-[#0f172a]/50 backdrop-blur-xl rounded-xl h-full border border-[#1e293b] flex flex-col shadow-2xl">
             {/* Header */}
