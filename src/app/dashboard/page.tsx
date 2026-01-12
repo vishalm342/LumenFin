@@ -33,7 +33,11 @@ export default function DashboardPage() {
         
         {/* Right Panel: Chat Interface (75%) */}
         <div className="flex-1 flex overflow-hidden">
-          <FinancialAnalysisChat currentChatId={currentChatId} onChatIdChange={setCurrentChatId} />
+          <FinancialAnalysisChat 
+            key={currentChatId}
+            currentChatId={currentChatId} 
+            onChatIdChange={setCurrentChatId} 
+          />
         </div>
       </main>
     </div>

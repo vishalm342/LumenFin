@@ -9,6 +9,7 @@ export default function ChatPage() {
   return (
     <div className="h-screen overflow-y-auto overflow-x-hidden bg-[#020617] flex">
       <FinancialAnalysisChat 
+        key={currentChatId}
         currentChatId={currentChatId} 
         onChatIdChange={setCurrentChatId} 
       />
