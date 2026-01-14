@@ -3,6 +3,13 @@ import { streamText } from 'ai';
 import { auth } from '@clerk/nextjs/server';
 import { searchFinancialChunks } from '@/lib/vectorstore';
 
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+// Production diagnostics (do not log secrets)
+console.log('DB_URI_LOADED', Boolean(process.env.MONGODB_URI));
+
 // Initialize Cerebras with explicit key check
 const cerebras = createCerebras({
   apiKey: process.env.CEREBRAS_API_KEY,

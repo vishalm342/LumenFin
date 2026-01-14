@@ -16,11 +16,24 @@ const pdf = (buffer: Buffer) => {
 // Professional configurations for heavy PDF processing
 export const maxDuration = 60; 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+// Production diagnostics (do not log secrets)
+console.log('DB_URI_LOADED', Boolean(process.env.MONGODB_URI));
+console.log('GEMINI_KEY_LOADED', Boolean(process.env.GOOGLE_API_KEY));
 
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const allowPublicIngest =
+      process.env.LUMENFIN_PUBLIC_INGEST === 'true' ||
+      process.env.ALLOW_PUBLIC_INGEST === 'true';
+
+    if (!userId && !allowPublicIngest) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const effectiveUserId = userId ?? 'public';
 
     const formData = await req.formData();
     const file = formData.get('file') as File;
@@ -45,6 +58,13 @@ export async function POST(req: Request) {
     const chunks = await textSplitter.createDocuments([extractedText]);
 
     // Step 4: Embeddings (Gemini 768-dimension resolution)
+    if (!process.env.GOOGLE_API_KEY) {
+      return NextResponse.json(
+        { error: 'Missing GOOGLE_API_KEY on server' },
+        { status: 500 }
+      );
+    }
+
     const embeddings = new GoogleGenerativeAIEmbeddings({
       apiKey: process.env.GOOGLE_API_KEY!,
       modelName: 'text-embedding-004',
@@ -66,7 +86,7 @@ export async function POST(req: Request) {
           fileName: file.name,
           pageNumber: i + 1,
           uploadedAt: new Date(),
-          userId: userId,
+          userId: effectiveUserId,
         },
       };
     }));
