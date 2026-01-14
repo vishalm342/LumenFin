@@ -8,6 +8,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/webhooks(.*)', // Clerk webhooks
+  '/api/ingest(.*)', // allow uploads during production testing
 ]);
 
 // Define auth routes for redirect logic
@@ -19,27 +20,9 @@ const isAuthRoute = createRouteMatcher([
 // Define API routes that need authentication
 const isProtectedApiRoute = createRouteMatcher([
   '/api/chat(.*)',
-  '/api/ingest(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
-  // Domain validation for production to prevent cookie mismatch errors
-  const host = req.headers.get('host');
-  const url = new URL(req.url);
-  
-  // Only run authentication checks on your production domain
-  // This prevents cookie domain mismatch issues
-  const isProductionDomain = host && (
-    host.includes('vercel.app') || 
-    host.includes('lumen-fin.vercel.app') ||
-    host === 'localhost:3000' // Allow local development
-  );
-
-  // Skip middleware for local development or non-production domains
-  if (!isProductionDomain && process.env.NODE_ENV === 'production') {
-    return NextResponse.next();
-  }
-
   const { userId } = await auth();
 
   // Redirect authenticated users away from auth pages

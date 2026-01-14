@@ -2,6 +2,9 @@ import { MongoClient, Db } from 'mongodb';
 
 const MONGODB_URI = process.env.MONGODB_URI!;
 
+// Production diagnostics (do not log secrets)
+console.log('DB_URI_LOADED', Boolean(process.env.MONGODB_URI));
+
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
