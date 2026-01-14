@@ -74,10 +74,11 @@ export default function DocumentVault() {
         const response = await fetch('/api/ingest', {
           method: 'POST',
           body: formData,
+          credentials: 'include',
         });
 
         if (!response.ok) {
-          throw new Error('Upload failed');
+          throw new Error(`Upload failed (HTTP ${response.status})`);
         }
 
         setDocuments(prev => prev.map(doc => 

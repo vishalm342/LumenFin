@@ -194,6 +194,7 @@ export default function FinancialAnalysisChat({ currentChatId, onChatIdChange }:
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ 
           messages: [...messages, userMsg].map(m => ({
             role: m.role,
@@ -332,6 +333,7 @@ export default function FinancialAnalysisChat({ currentChatId, onChatIdChange }:
       if (!chatId.startsWith('chat_') && chatId !== 'default') {
         const response = await fetch(`/api/chat/${chatId}`, {
           method: 'DELETE',
+          credentials: 'include',
         });
         
         if (!response.ok) {
