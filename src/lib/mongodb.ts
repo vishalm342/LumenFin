@@ -1,13 +1,24 @@
 import { MongoClient, Db } from 'mongodb';
 
-const MONGODB_URI = process.env.MONGODB_URI!;
-
-// Production diagnostics (do not log secrets)
-console.log('DB_URI_LOADED', Boolean(process.env.MONGODB_URI));
+// ========================================
+// CRITICAL: Environment Variable Validation
+// ========================================
+// This check happens at module initialization (server startup)
+// If MONGODB_URI is missing, the server will fail loudly and immediately
+// rather than causing 500 errors during runtime.
+const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+  throw new Error(
+    '❌ FATAL: MONGODB_URI environment variable is not defined!\n' +
+    '   → Please add MONGODB_URI to your .env.local file\n' +
+    '   → Example: MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/dbname\n' +
+    '   → See .env.local.example for reference'
+  );
 }
+
+// Production diagnostics (do not log secrets)
+console.log('✅ DB_URI_LOADED:', Boolean(MONGODB_URI));
 
 // Global cache to prevent multiple connections in serverless environments (Singleton pattern)
 interface CachedConnection {
@@ -23,6 +34,10 @@ if (!cached) {
 }
 
 export async function connectDB(): Promise<{ client: MongoClient; db: Db }> {
+  // MONGODB_URI is guaranteed to be defined due to top-level check
+  // This assertion is safe because we throw at module init if undefined
+  const uri = MONGODB_URI as string;
+
   // Return cached connection if available
   if (cached.client && cached.db) {
     return { client: cached.client, db: cached.db };
@@ -35,8 +50,9 @@ export async function connectDB(): Promise<{ client: MongoClient; db: Db }> {
       minPoolSize: 2,
     };
 
-    cached.promise = MongoClient.connect(MONGODB_URI, opts).then((client) => {
+    cached.promise = MongoClient.connect(uri, opts).then((client) => {
       const db = client.db('LumenFin');
+      console.log('✅ MongoDB connected successfully to database: LumenFin');
       return { client, db };
     });
   }
