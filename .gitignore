@@ -10,3 +10,5 @@ out/
 # Production
 build/
 dist/
+# clerk configuration (can include secrets)
+/.clerk/
