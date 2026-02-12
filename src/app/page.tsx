@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { SignedIn, SignedOut } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
-import { Play, ArrowRight, Zap, Shield, BarChart3 } from 'lucide-react';
+import { Play, ArrowRight, Zap, Shield, BarChart3, FileText, Database, Cpu, Lock, Layers, GitBranch } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -14,15 +14,6 @@ export default function Home() {
       {/* Hero Content */}
       <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 text-center">
         <div className="max-w-5xl mx-auto">
-          {/* Logo Badge */}
-          <div className="mb-8 inline-flex items-center gap-2 px-4 py-2 bg-[#10b981]/10 border border-[#10b981]/30 rounded-full">
-            <span className="text-2xl">📊</span>
-            <span className="text-sm font-bold tracking-tight">
-              Lumen<span className="text-[#10b981]">Fin</span>
-            </span>
-            <span className="text-xs text-slate-500 ml-2">v1.0</span>
-          </div>
-
           {/* Headline */}
           <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-[1.1]">
             <span className="bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
@@ -86,6 +77,229 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Architecture Section */}
+      <section className="relative z-10 py-24 px-4">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-slate-200">
+              Technical Architecture
+            </h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+              Enterprise-grade RAG pipeline built with cutting-edge AI infrastructure
+            </p>
+          </div>
+
+          {/* 3-Column Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Step 1: PDF Parsing & Chunking */}
+            <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl p-6 hover:border-[#10b981]/50 transition-all group">
+              <div className="flex items-center justify-center w-16 h-16 bg-[#10b981]/10 rounded-xl mb-6 group-hover:scale-110 transition-transform">
+                <FileText className="w-8 h-8 text-[#10b981]" />
+              </div>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-2xl font-bold text-slate-200">01</span>
+                <h3 className="text-xl font-bold text-slate-200">PDF Parsing</h3>
+              </div>
+              <p className="text-sm text-slate-400 leading-relaxed mb-4">
+                Documents are parsed using <span className="text-[#10b981] font-semibold">pdf-parse</span> and split into semantic chunks with LangChain's RecursiveCharacterTextSplitter.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-2 py-1 bg-slate-800/50 text-xs text-slate-400 rounded-md border border-slate-700">1000 char chunks</span>
+                <span className="px-2 py-1 bg-slate-800/50 text-xs text-slate-400 rounded-md border border-slate-700">200 overlap</span>
+              </div>
+            </div>
+
+            {/* Step 2: Google Gemini Vectorization */}
+            <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl p-6 hover:border-[#10b981]/50 transition-all group">
+              <div className="flex items-center justify-center w-16 h-16 bg-[#10b981]/10 rounded-xl mb-6 group-hover:scale-110 transition-transform">
+                <Database className="w-8 h-8 text-[#10b981]" />
+              </div>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-2xl font-bold text-slate-200">02</span>
+                <h3 className="text-xl font-bold text-slate-200">Vectorization</h3>
+              </div>
+              <p className="text-sm text-slate-400 leading-relaxed mb-4">
+                Chunks are embedded using <span className="text-[#10b981] font-semibold">Google Gemini text-embedding-004</span> and stored in MongoDB Atlas with vector search indexes.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-2 py-1 bg-slate-800/50 text-xs text-slate-400 rounded-md border border-slate-700">768-dim vectors</span>
+                <span className="px-2 py-1 bg-slate-800/50 text-xs text-slate-400 rounded-md border border-slate-700">HNSW index</span>
+              </div>
+            </div>
+
+            {/* Step 3: Cerebras Inference */}
+            <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl p-6 hover:border-[#10b981]/50 transition-all group">
+              <div className="flex items-center justify-center w-16 h-16 bg-[#10b981]/10 rounded-xl mb-6 group-hover:scale-110 transition-transform">
+                <Cpu className="w-8 h-8 text-[#10b981]" />
+              </div>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-2xl font-bold text-slate-200">03</span>
+                <h3 className="text-xl font-bold text-slate-200">Inference</h3>
+              </div>
+              <p className="text-sm text-slate-400 leading-relaxed mb-4">
+                Retrieved context is fed to <span className="text-[#10b981] font-semibold">Cerebras Llama 3.3 70B</span> for sub-second, grounded financial analysis with source citations.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-2 py-1 bg-slate-800/50 text-xs text-slate-400 rounded-md border border-slate-700">&lt;1s response</span>
+                <span className="px-2 py-1 bg-slate-800/50 text-xs text-slate-400 rounded-md border border-slate-700">Streaming</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Data Flow Visualization */}
+          <div className="mt-12 flex items-center justify-center gap-4 text-slate-600">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-mono">PDF Upload</span>
+              <ArrowRight className="w-4 h-4" />
+              <span className="text-sm font-mono">Chunking</span>
+              <ArrowRight className="w-4 h-4" />
+              <span className="text-sm font-mono">Embedding</span>
+              <ArrowRight className="w-4 h-4" />
+              <span className="text-sm font-mono">Vector DB</span>
+              <ArrowRight className="w-4 h-4" />
+              <span className="text-sm font-mono">LLM Query</span>
+              <ArrowRight className="w-4 h-4" />
+              <span className="text-sm font-mono text-[#10b981]">Response</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Tech Stack Section */}
+      <section className="relative z-10 py-24 px-4 bg-slate-950/30">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-slate-200">
+              Production-Ready Stack
+            </h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+              Built with enterprise frameworks and battle-tested infrastructure
+            </p>
+          </div>
+
+          {/* Tech Stack Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {/* Next.js 15 */}
+            <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl p-6 hover:border-[#10b981]/50 transition-all">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center justify-center w-12 h-12 bg-slate-800/50 rounded-lg">
+                  <Layers className="w-6 h-6 text-slate-200" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-200">Next.js 15</h3>
+                  <p className="text-sm text-slate-400">App Router + RSC</p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Server-side rendering with React Server Components for optimal performance and SEO.
+              </p>
+            </div>
+
+            {/* MongoDB Atlas */}
+            <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl p-6 hover:border-[#10b981]/50 transition-all">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center justify-center w-12 h-12 bg-[#10b981]/10 rounded-lg">
+                  <Database className="w-6 h-6 text-[#10b981]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-200">MongoDB Atlas</h3>
+                  <p className="text-sm text-slate-400">Vector Search</p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Native vector search with HNSW indexing for blazing-fast semantic retrieval at scale.
+              </p>
+            </div>
+
+            {/* Clerk Auth */}
+            <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl p-6 hover:border-[#10b981]/50 transition-all">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center justify-center w-12 h-12 bg-slate-800/50 rounded-lg">
+                  <Lock className="w-6 h-6 text-slate-200" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-200">Clerk</h3>
+                  <p className="text-sm text-slate-400">Authentication</p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Enterprise-grade authentication with user isolation and protected API routes.
+              </p>
+            </div>
+
+            {/* Cerebras AI */}
+            <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl p-6 hover:border-[#10b981]/50 transition-all">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center justify-center w-12 h-12 bg-[#10b981]/10 rounded-lg">
+                  <Cpu className="w-6 h-6 text-[#10b981]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-200">Cerebras</h3>
+                  <p className="text-sm text-slate-400">Llama 3.3 70B</p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Fastest inference on the market with streaming responses for real-time user feedback.
+              </p>
+            </div>
+
+            {/* LangChain */}
+            <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl p-6 hover:border-[#10b981]/50 transition-all">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center justify-center w-12 h-12 bg-slate-800/50 rounded-lg">
+                  <GitBranch className="w-6 h-6 text-slate-200" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-200">LangChain</h3>
+                  <p className="text-sm text-slate-400">RAG Framework</p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Industry-standard tooling for document loading, text splitting, and embeddings.
+              </p>
+            </div>
+
+            {/* Vercel AI SDK */}
+            <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl p-6 hover:border-[#10b981]/50 transition-all">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center justify-center w-12 h-12 bg-slate-800/50 rounded-lg">
+                  <Zap className="w-6 h-6 text-slate-200" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-200">Vercel AI SDK</h3>
+                  <p className="text-sm text-slate-400">Streaming</p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Seamless streaming integration with React hooks for fluid UX during inference.
+              </p>
+            </div>
+          </div>
+
+          {/* Call to Action */}
+          <div className="text-center mt-16">
+            <SignedIn>
+              <Link href="/dashboard">
+                <Button className="bg-gradient-to-r from-[#10b981] to-[#059669] hover:from-[#059669] hover:to-[#047857] text-slate-950 font-bold py-4 px-10 rounded-xl text-base transition-all shadow-xl shadow-[#10b981]/20 hover:shadow-[#10b981]/40 hover:scale-105">
+                  Go to Dashboard
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+            </SignedIn>
+            <SignedOut>
+              <Link href="/sign-in">
+                <Button className="bg-gradient-to-r from-[#10b981] to-[#059669] hover:from-[#059669] hover:to-[#047857] text-slate-950 font-bold py-4 px-10 rounded-xl text-base transition-all shadow-xl shadow-[#10b981]/20 hover:shadow-[#10b981]/40 hover:scale-105">
+                  Start Building
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+            </SignedOut>
+          </div>
+        </div>
+      </section>
 
       {/* Decorative sparkle */}
       <div className="absolute bottom-16 right-16 text-8xl text-slate-800/20 rotate-12 animate-pulse">✦</div>
