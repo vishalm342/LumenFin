@@ -2,6 +2,14 @@
 
 **Illuminating Financial Data with High-Speed Hybrid RAG & Grounded Intelligence**
 
+## 📚 Quick Links
+
+- **[Quick Start Guide](QUICK_START.md)** - Get up and running in 5 minutes
+- **[MongoDB Vector Index Setup](MONGODB_VECTOR_INDEX_SETUP.md)** - Required for chat functionality
+- **[Chat System Verification](CHAT_SYSTEM_VERIFICATION.md)** - End-to-end testing guide
+- **[Phase 3 Implementation](PHASE_3_IMPLEMENTATION.md)** - Latest fixes and improvements
+- **[Testing Guide](TESTING_GUIDE.md)** - Comprehensive testing documentation
+
 ## 🌟 Overview
 
 LumenFin is a professional-grade Financial Intelligence Engine designed to solve the "Hallucination Problem" in AI-driven financial analysis. Traditional AI often struggles with the precision required for financial data; LumenFin solves this by implementing a Strictly Grounded RAG (Retrieval-Augmented Generation) architecture.
