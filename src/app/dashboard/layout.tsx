@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, FileText, MessageSquare, Sparkles, Menu, X, ChevronLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Toaster } from 'sonner';
 
 export default function DashboardLayout({
   children,
@@ -36,6 +37,7 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-[#020617] overflow-hidden relative">
+      <Toaster position="top-right" theme="dark" />
       {/* Sidebar */}
       <aside 
         className={`${
