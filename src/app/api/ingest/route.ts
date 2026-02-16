@@ -1,110 +1,119 @@
-// 
-
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import connectDB from '@/lib/mongodb';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
+import { auth } from '@clerk/nextjs/server';
+import connectDB from '@/lib/mongodb';
+import { WebPDFLoader } from "@langchain/community/document_loaders/web/pdf";
 
-// REQUIRED: Use require for legacy CommonJS pdf-parse in Next.js 16/Turbopack
-// Replace Line 10 with this:
-const pdf = (buffer: Buffer) => {
-  const parse = require('pdf-parse/lib/pdf-parse.js');
-  return parse(buffer);
-};
-
-// Professional configurations for heavy PDF processing
-export const maxDuration = 60; 
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
-
-// Production diagnostics (do not log secrets)
-console.log('DB_URI_LOADED', Boolean(process.env.MONGODB_URI));
-console.log('GEMINI_KEY_LOADED', Boolean(process.env.GOOGLE_API_KEY));
 
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
-    const allowPublicIngest =
-      process.env.LUMENFIN_PUBLIC_INGEST === 'true' ||
-      process.env.ALLOW_PUBLIC_INGEST === 'true';
-
-    if (!userId && !allowPublicIngest) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const effectiveUserId = userId ?? 'public';
+    if (!process.env.GOOGLE_API_KEY || !process.env.MONGODB_URI) throw new Error('Missing env vars');
 
     const formData = await req.formData();
     const file = formData.get('file') as File;
+    if (!file) return NextResponse.json({ error: "No file found" }, { status: 400 });
 
-    if (!file || file.type !== 'application/pdf') {
-      return NextResponse.json({ error: 'Invalid file' }, { status: 400 });
-    }
-
-    // Step 1: Buffer Conversion
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    // Convert Buffer to Blob for WebPDFLoader
+    const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
 
-    // Step 2: Extraction
-    const pdfData = await pdf(buffer); // Fixed case-sensitivity
-    const extractedText = pdfData.text;
+    // @ts-ignore - WebPDFLoader types might need adjustment in some envs
+    const loader = new WebPDFLoader(blob, {
+      // Optional: you can pass parameters here if needed
+    });
 
-    // Step 3: Chunking (Recursive splitting preserves financial context)
+    const rawDocs = await loader.load();
+
     const textSplitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 200,
     });
-    const chunks = await textSplitter.createDocuments([extractedText]);
 
-    // Step 4: Embeddings (Gemini 768-dimension resolution)
-    if (!process.env.GOOGLE_API_KEY) {
-      return NextResponse.json(
-        { error: 'Missing GOOGLE_API_KEY on server' },
-        { status: 500 }
-      );
-    }
+    const splits = await textSplitter.splitDocuments(rawDocs);
 
-    const embeddings = new GoogleGenerativeAIEmbeddings({
-      apiKey: process.env.GOOGLE_API_KEY!,
-      modelName: 'text-embedding-004',
-    });
-
-    // Debug logging for Vercel deployment tracking
-    console.log('Connecting to DB...');
-    const { db } = await connectDB();
-    console.log('DB connection successful');
-    const collection = db.collection('financial_chunks');
-
-    // Step 5: Batch Processing
-    const documents = await Promise.all(chunks.map(async (chunk, i) => {
-      const embedding = await embeddings.embedQuery(chunk.pageContent);
-      return {
-        content: chunk.pageContent,
-        embedding: embedding,
-        metadata: {
-          fileName: file.name,
-          pageNumber: i + 1,
-          uploadedAt: new Date(),
-          userId: effectiveUserId,
-        },
-      };
+    // CRITICAL: Preserve metadata and ensure userId is attached
+    const docs = splits.map(chunk => ({
+      pageContent: chunk.pageContent,
+      metadata: {
+        ...chunk.metadata,
+        userId: userId,
+        fileName: file.name,
+        uploadedAt: new Date(),
+        // WebPDFLoader usually puts page number in loc.pageNumber (1-indexed)
+        pageNumber: chunk.metadata.loc?.pageNumber || 1
+      }
     }));
 
-    await collection.insertMany(documents);
+    try {
+      // Standard LangChain embeddings with 3072 dimensions (matches MongoDB)
+      const embeddings = new GoogleGenerativeAIEmbeddings({
+        model: "models/gemini-embedding-001",
+        taskType: "RETRIEVAL_DOCUMENT" as any, // For document embedding
+      });
 
-    return NextResponse.json({ success: true, message: `Indexed ${chunks.length} chunks.` });
+      const { db } = await connectDB();
+      const collection = db.collection('financial_chunks');
 
-  } catch (error) {
-    // Enhanced error logging for Vercel debugging
-    console.error('Ingestion Error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const errorStack = error instanceof Error ? error.stack : 'No stack trace';
-    console.error('Error details:', { message: errorMessage, stack: errorStack });
-    return NextResponse.json({ 
-      error: 'Failed to process PDF', 
-      details: errorMessage 
-    }, { status: 500 });
+      // ⚡ OPTIMIZED BATCHING
+      // Google GenAI supports batch embedding. We can send multiple texts in one go.
+      // Batch size of 50 is a safe sweet spot for performant ingestion without hitting payload limits.
+      const batchSize = 50;
+
+      console.log(`🚀 Starting optimized batch processing: ${docs.length} chunks in batches of ${batchSize}`);
+
+      let totalProcessed = 0;
+
+      for (let i = 0; i < docs.length; i += batchSize) {
+        const batch = docs.slice(i, i + batchSize);
+        const batchTexts = batch.map(d => d.pageContent);
+        const batchNumber = Math.floor(i / batchSize) + 1;
+        const totalBatches = Math.ceil(docs.length / batchSize);
+
+        console.log(`📦 Processing batch ${batchNumber}/${totalBatches} (${batch.length} chunks)...`);
+
+        try {
+          // Generate embeddings in a single batch call (Much faster than 1-by-1)
+          const batchEmbeddings = await embeddings.embedDocuments(batchTexts);
+
+          // Prepare vectors for insertion
+          const batchVectors = batch.map((doc, idx) => ({
+            content: doc.pageContent,
+            embedding: batchEmbeddings[idx],
+            metadata: doc.metadata,
+          }));
+
+          // Insert batch to MongoDB
+          await collection.insertMany(batchVectors);
+          totalProcessed += batchVectors.length;
+
+          console.log(`💾 Inserted batch ${batchNumber}/${totalBatches}`);
+
+        } catch (batchError: any) {
+          console.error(`❌ Batch ${batchNumber} failed:`, batchError);
+          // If a batch fails, we might want to try individual or just throw
+          throw batchError;
+        }
+      }
+
+      console.log(`✅ Successfully processed and inserted ${totalProcessed} chunks into database`);
+
+    } catch (embeddingError) {
+      console.error("❌ Embedding generation failed:", embeddingError);
+      throw embeddingError;
+    }
+
+    return NextResponse.json({ success: true, chunks: docs.length });
+
+  } catch (error: any) {
+    console.error("Ingestion failed:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-
