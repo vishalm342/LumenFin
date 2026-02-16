@@ -1,6 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
 // Define public routes that don't require authentication
 const isPublicRoute = createRouteMatcher([
@@ -22,7 +21,7 @@ const isProtectedApiRoute = createRouteMatcher([
   '/api/chat(.*)',
 ]);
 
-export default clerkMiddleware(async (auth, req: NextRequest) => {
+export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
 
   // Redirect authenticated users away from auth pages
@@ -51,14 +50,8 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
-     * - All files with extensions (.html, .css, .js, .jpg, etc.)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf|eot)).*)',
+    // Skip Next.js internals and all static files
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
     // Always run for API routes
     '/(api|trpc)(.*)',
   ],
