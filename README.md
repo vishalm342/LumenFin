@@ -266,12 +266,3 @@ MIT License - See LICENSE file for details
 
 Contributions are welcome! Please open an issue or submit a pull request.
 
-## 📧 Support
-
-For questions or support, please open an issue on GitHub.
-│   └── dashboard/    # Protected analysis interface
-├── components/       # UI components (Upload, Chat, Citations)
-├── lib/              # Core logic (MongoDB, LangChain, Cerebras)
-├── models/           # Mongoose schemas for chunks
-└── types/            # TypeScript definitions
-
