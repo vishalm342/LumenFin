@@ -76,30 +76,37 @@ export default function FinancialAnalysisChat({ currentChatId, onChatIdChange }:
     const userMessage = input.trim();
     setInput('');
     setIsLoadingManual(true);
-    
+
     try {
       // Manually call the API with chatId included
-      const newUserMsg: UIMessage = { 
-        id: Date.now().toString(), 
-        role: 'user', 
+      const newUserMsg: UIMessage = {
+        id: Date.now().toString(),
+        role: 'user',
         parts: [{ type: 'text', text: userMessage }],
       };
       const newMessages = [...messages, newUserMsg];
-      
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          messages: newMessages.map(m => ({ 
-            role: m.role, 
+        body: JSON.stringify({
+          messages: newMessages.map(m => ({
+            role: m.role,
             content: m.parts?.filter(p => p.type === 'text').map(p => (p as any).text).join('') || ''
-          })), 
-          chatId: currentChatId 
+          })),
+          chatId: currentChatId
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        let errorMessage = 'Failed to send message';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          errorMessage = `Request failed with status ${response.status}`;
+        }
+        throw new Error(errorMessage);
       }
 
       // Update messages with user message
@@ -115,20 +122,20 @@ export default function FinancialAnalysisChat({ currentChatId, onChatIdChange }:
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          
+
           const chunk = decoder.decode(value, { stream: true });
           assistantMessage += chunk;
-          
+
           // Update messages with the growing assistant response
           const assistantMsg: UIMessage = {
             id: assistantId,
             role: 'assistant',
             parts: [{ type: 'text', text: assistantMessage }],
           };
-          
+
           setMessages([...newMessages, assistantMsg]);
         }
-        
+
         // Trigger finish callback
         setRefreshSidebarTrigger(prev => prev + 1);
       }
