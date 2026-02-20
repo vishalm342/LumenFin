@@ -1,4 +1,4 @@
-import { createCerebras } from '@ai-sdk/cerebras';
+import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 import { auth } from '@clerk/nextjs/server';
 import { searchFinancialChunks } from '@/lib/vectorstore';
@@ -9,24 +9,35 @@ export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Initialize Cerebras provider
-const cerebras = createCerebras({
-  apiKey: process.env.CEREBRAS_API_KEY || '',
+// Initialize SambaNova provider (OpenAI-compatible)
+// baseURL must point to SambaNova — NOT OpenAI.
+// We use .chat() because in @ai-sdk/openai v3+, calling provider() directly
+// targets the new Responses API (/v1/responses), which SambaNova returns 404 on.
+// .chat() correctly targets /v1/chat/completions.
+const sambanova = createOpenAI({
+  baseURL: 'https://api.sambanova.ai/v1',
+  apiKey: process.env.SAMBANOVA_API_KEY ?? '',
 });
 
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
-      return new Response(JSON.stringify({ error: 'Unauthorized. Please sign in.' }), { 
-        status: 401, 
-        headers: { 'Content-Type': 'application/json' } 
+      return new Response(JSON.stringify({ error: 'Unauthorized. Please sign in.' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    if (!process.env.MONGODB_URI || !process.env.CEREBRAS_API_KEY) {
-      return new Response(JSON.stringify({ error: 'Configuration missing.' }), { status: 503 });
+    // Runtime guard – reads the live value so a server restart is always reflected
+    const sambanovaKey = process.env.SAMBANOVA_API_KEY;
+    if (!process.env.MONGODB_URI || !sambanovaKey) {
+      console.error('Missing env vars → MONGODB_URI:', !!process.env.MONGODB_URI, '| SAMBANOVA_API_KEY:', !!sambanovaKey);
+      return new Response(JSON.stringify({ error: 'Configuration missing. Check SAMBANOVA_API_KEY in .env.local and restart the server.' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     const body = await req.json();
@@ -62,7 +73,7 @@ export async function POST(req: Request) {
 
     // STEP 2: Generate Embedding (handled in searchFinancialChunks - defaults to 3072 dimensions)
     console.log('1. Embedding generated');
-    
+
     // STEP 3: Vector Search
     let relevantChunks: any[] = [];
     try {
@@ -82,10 +93,11 @@ export async function POST(req: Request) {
 
     // STEP 6: Streaming & DB Saving
     const result = await streamText({
-      model: cerebras('llama3.3-70b'),
+      model: sambanova.chat('Meta-Llama-3.3-70B-Instruct'), // .chat() → /v1/chat/completions (SambaNova compatible)
       system: systemPrompt,
       messages: messages,
       temperature: 0.1,
+      maxOutputTokens: 8192,
       async onFinish({ text }) {
         // Save chat to database asynchronously (non-blocking)
         if (chatId) {
