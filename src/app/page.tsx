@@ -32,7 +32,7 @@ export default function Home() {
             High-speed RAG analysis for complex financial documents.
           </p>
           <p className="text-slate-500 text-lg mb-12">
-            Powered by <span className="text-[#10b981] font-semibold">Cerebras</span> & <span className="text-[#10b981] font-semibold">MongoDB</span>
+            Powered by <span className="text-[#10b981] font-semibold">SambaNova</span> & <span className="text-[#10b981] font-semibold">MongoDB</span>
           </p>
 
           {/* Action Buttons */}
@@ -129,7 +129,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Step 3: Cerebras Inference */}
+            {/* Step 3: SambaNova Inference */}
             <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl p-6 hover:border-[#10b981]/50 transition-all group">
               <div className="flex items-center justify-center w-16 h-16 bg-[#10b981]/10 rounded-xl mb-6 group-hover:scale-110 transition-transform">
                 <Cpu className="w-8 h-8 text-[#10b981]" />
@@ -139,7 +139,7 @@ export default function Home() {
                 <h3 className="text-xl font-bold text-slate-200">Inference</h3>
               </div>
               <p className="text-sm text-slate-400 leading-relaxed mb-4">
-                Retrieved context is fed to <span className="text-[#10b981] font-semibold">Cerebras Llama 3.3 70B</span> for sub-second, grounded financial analysis with source citations.
+                Retrieved context is fed to <span className="text-[#10b981] font-semibold">SambaNova Meta-Llama-3.3-70B</span> for sub-second, grounded financial analysis with source citations.
               </p>
               <div className="flex flex-wrap gap-2">
                 <span className="px-2 py-1 bg-slate-800/50 text-xs text-slate-400 rounded-md border border-slate-700">&lt;1s response</span>
@@ -230,15 +230,15 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Cerebras AI */}
+            {/* SambaNova AI */}
             <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl p-6 hover:border-[#10b981]/50 transition-all">
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center justify-center w-12 h-12 bg-[#10b981]/10 rounded-lg">
                   <Cpu className="w-6 h-6 text-[#10b981]" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-200">Cerebras</h3>
-                  <p className="text-sm text-slate-400">Llama 3.3 70B</p>
+                  <h3 className="text-lg font-bold text-slate-200">SambaNova</h3>
+                  <p className="text-sm text-slate-400">Meta Llama 3.3 70B</p>
                 </div>
               </div>
               <p className="text-sm text-slate-400 leading-relaxed">
