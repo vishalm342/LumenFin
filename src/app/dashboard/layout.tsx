@@ -39,10 +39,9 @@ export default function DashboardLayout({
     <div className="flex h-screen bg-[#020617] overflow-hidden relative">
       <Toaster position="top-right" theme="dark" />
       {/* Sidebar */}
-      <aside 
-        className={`${
-          isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full opacity-0'
-        } bg-slate-900/50 backdrop-blur-xl border-r border-[#1e293b] flex flex-col transition-all duration-300 ease-in-out absolute md:relative z-40 h-full`}
+      <aside
+        className={`${isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full opacity-0'
+          } bg-slate-900/50 backdrop-blur-xl border-r border-[#1e293b] flex flex-col transition-all duration-300 ease-in-out absolute md:relative z-40 h-full`}
       >
         {/* Logo & Toggle */}
         <div className="p-6 border-b border-[#1e293b]/50 flex justify-between items-center">
@@ -52,17 +51,17 @@ export default function DashboardLayout({
               Lumen<span className="text-[#10b981]">Fin</span>
             </span>
           </Link>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setIsSidebarOpen(false)}
             className="text-slate-400 hover:text-white md:flex hidden"
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
-           <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setIsSidebarOpen(false)}
             className="text-slate-400 hover:text-white md:hidden flex"
           >
@@ -76,11 +75,10 @@ export default function DashboardLayout({
             <li>
               <Link
                 href="/dashboard"
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all relative group ${
-                  isActive('/dashboard')
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all relative group ${isActive('/dashboard')
                     ? 'bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/30'
                     : 'text-slate-400 hover:bg-[#1e293b]/50 hover:text-white border border-transparent'
-                }`}
+                  }`}
               >
                 {isActive('/dashboard') && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#10b981] rounded-r"></div>
@@ -92,11 +90,10 @@ export default function DashboardLayout({
             <li>
               <Link
                 href="/dashboard/documents"
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all relative group ${
-                  isActive('/dashboard/documents')
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all relative group ${isActive('/dashboard/documents')
                     ? 'bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/30'
                     : 'text-slate-400 hover:bg-[#1e293b]/50 hover:text-white border border-transparent'
-                }`}
+                  }`}
               >
                 {isActive('/dashboard/documents') && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#10b981] rounded-r"></div>
@@ -108,11 +105,10 @@ export default function DashboardLayout({
             <li>
               <Link
                 href="/dashboard/chat"
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all relative group ${
-                  isActive('/dashboard/chat')
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all relative group ${isActive('/dashboard/chat')
                     ? 'bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/30'
                     : 'text-slate-400 hover:bg-[#1e293b]/50 hover:text-white border border-transparent'
-                }`}
+                  }`}
               >
                 {isActive('/dashboard/chat') && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#10b981] rounded-r"></div>
@@ -130,7 +126,7 @@ export default function DashboardLayout({
               <span className="text-xs font-semibold text-[#10b981]">AI-Powered</span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Upload PDFs and get instant AI analysis with Cerebras inference.
+              Upload PDFs and get instant AI analysis with SambaNova inference.
             </p>
           </div>
         </nav>
@@ -149,19 +145,19 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <main className="flex-1 overflow-hidden relative flex flex-col">
-         {/* Toggle Button when sidebar is closed */}
-         {!isSidebarOpen && (
-            <div className="absolute top-4 left-4 z-50">
-                <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => setIsSidebarOpen(true)} 
-                    className="text-slate-400 hover:text-white bg-slate-900/50 backdrop-blur border border-slate-800"
-                >
-                    <Menu className="h-6 w-6" />
-                </Button>
-            </div>
-         )}
+        {/* Toggle Button when sidebar is closed */}
+        {!isSidebarOpen && (
+          <div className="absolute top-4 left-4 z-50">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsSidebarOpen(true)}
+              className="text-slate-400 hover:text-white bg-slate-900/50 backdrop-blur border border-slate-800"
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+          </div>
+        )}
         {children}
       </main>
     </div>
