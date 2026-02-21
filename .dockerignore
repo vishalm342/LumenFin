@@ -1,0 +1,39 @@
+# ── Node / Build artefacts ──────────────────────────────────
+node_modules
+.next
+out
+dist
+
+# ── Environment / Secrets ───────────────────────────────────
+.env*.local
+.env
+
+# ── Git / CI ────────────────────────────────────────────────
+.git
+.gitignore
+
+# ── Editor metadata ─────────────────────────────────────────
+.vscode
+.idea
+*.swp
+*.swo
+
+# ── Docs / markdown ─────────────────────────────────────────
+*.md
+README*
+TESTING*
+QUICK_START*
+IMPLEMENTATION*
+PHASE*
+CHAT_SYSTEM*
+DIMENSION*
+FINAL_REPORT*
+MONGODB_VECTOR*
+
+# ── Test / lint ─────────────────────────────────────────────
+coverage
+.eslintcache
+
+# ── OS noise ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
