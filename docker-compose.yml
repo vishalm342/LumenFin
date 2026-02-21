@@ -1,3 +1,86 @@
 version: '3.8'
+
 services:
-  # Add services here
+  # ============================================================
+  # LumenFin - Next.js Application
+  # ============================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lumenfin-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # ── Next.js runtime ──────────────────────────────────────
+      NODE_ENV: production
+      PORT: 3000
+
+      # ── Clerk Authentication ──────────────────────────────────
+      # Public key (exposed to browser via Next.js)
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+
+      # ── MongoDB Atlas (cloud-hosted) ──────────────────────────
+      # Format: mongodb+srv://user:pass@cluster.mongodb.net/LumenFin
+      MONGODB_URI: ${MONGODB_URI}
+
+      # ── SambaNova AI (chat inference) ─────────────────────────
+      SAMBANOVA_API_KEY: ${SAMBANOVA_API_KEY}
+
+      # ── Google AI (document embeddings — gemini-embedding-001) ─
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+
+    # Load secrets from .env.local / .env file at compose-up time
+    env_file:
+      - .env.local
+
+    # Health-check: poll the Next.js readiness endpoint
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+
+    # Increase shared memory for PDF processing (pdf-parse / pdfjs-dist)
+    shm_size: '256mb'
+
+    # Resource limits — tune based on your host
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+        reservations:
+          memory: 512m
+
+    # Named volume for Next.js build cache (.next folder)
+    volumes:
+      - nextjs_cache:/app/.next/cache
+
+# ============================================================
+# Named volumes
+# ============================================================
+volumes:
+  # Persists Next.js build-cache between container restarts
+  nextjs_cache:
+
+    # ============================================================
+    # Notes
+    # ============================================================
+    # MongoDB is hosted on MongoDB Atlas (cloud) — no local mongo
+    # container is needed.  All other AI services (Clerk, Google AI,
+    # SambaNova) are also external SaaS APIs.
+    #
+    # To start in development mode instead of production, override
+    # the command:
+    #
+    #   docker compose run --rm app npm run dev
+    #
+    # Required .env.local variables (see .env.local.example):
+    #   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+    #   CLERK_SECRET_KEY
+    #   MONGODB_URI
+    #   SAMBANOVA_API_KEY
+    #   GOOGLE_API_KEY
