@@ -124,12 +124,13 @@ export default function Home() {
                 Chunks are embedded using <span className="text-[#10b981] font-semibold">Google Gemini text-embedding-004</span> and stored in MongoDB Atlas with vector search indexes.
               </p>
               <div className="flex flex-wrap gap-2">
-                <span className="px-2 py-1 bg-slate-800/50 text-xs text-slate-400 rounded-md border border-slate-700">768-dim vectors</span>
+                <span className="px-2 py-1 bg-slate-800/50 text-xs text-slate-400 rounded-md border border-slate-700">3072-dim vectors</span>
                 <span className="px-2 py-1 bg-slate-800/50 text-xs text-slate-400 rounded-md border border-slate-700">HNSW index</span>
               </div>
             </div>
 
             {/* Step 3: SambaNova Inference */}
+            
             <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl p-6 hover:border-[#10b981]/50 transition-all group">
               <div className="flex items-center justify-center w-16 h-16 bg-[#10b981]/10 rounded-xl mb-6 group-hover:scale-110 transition-transform">
                 <Cpu className="w-8 h-8 text-[#10b981]" />

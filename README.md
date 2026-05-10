@@ -40,7 +40,7 @@ By combining Semantic Vector Search with Metadata Filtering, the platform allows
 The LumenFin RAG pipeline is built for data integrity and speed:
 
 1. **Ingestion**: PDFs are parsed and segmented into 1,000-character chunks with a 200-character overlap to preserve semantic context.
-2. **Vectorization**: Chunks are converted into 768-dimension vectors using Google Gemini Embeddings and stored in MongoDB Atlas.
+2. **Vectorization**: Chunks are converted into 3072-dimension vectors using Google Gemini Embeddings and stored in MongoDB Atlas.
 3. **Retrieval**: The system performs a similarity search using the `$vectorSearch` operator, filtered by user-provided metadata.
 4. **Generation**: Retrieved context is passed to the Cerebras inference engine, which synthesizes the final response within milliseconds.
 
