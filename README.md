@@ -29,7 +29,7 @@ By combining Semantic Vector Search with Metadata Filtering, the platform allows
 ## 🛠️ Technical Stack
 
 - **Frontend**: Next.js 15 (App Router), Tailwind CSS, React Dropzone
-- **Inference Engine**: Cerebras (Llama-3.3-70b) via Vercel AI SDK
+- **Inference Engine**: SambaNova API (Llama-3.3-70b Instruct) via Vercel AI SDK
 - **Vector Database**: MongoDB Atlas Vector Search
 - **Orchestration**: LangChain.js & Vercel AI SDK
 - **Authentication**: Clerk (Managed Session & User Management)
@@ -82,7 +82,7 @@ CLERK_SECRET_KEY=your_secret_key_here
 MONGODB_URI=your_mongodb_connection_string_here
 
 # Cerebras AI API
-CEREBRAS_API_KEY=your_cerebras_api_key_here
+SAMBANOVA_API_KEY=your_cerebras_api_key_here
 
 # Google AI API (for embeddings)
 GOOGLE_API_KEY=your_google_api_key_here
@@ -244,7 +244,7 @@ Ensure all these are set in your production environment:
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
 - `MONGODB_URI`
-- `CEREBRAS_API_KEY`
+- `SAMBANOVA_API_KEY`
 - `GOOGLE_API_KEY`
 
 ## 🐛 Troubleshooting
@@ -257,7 +257,7 @@ Ensure all these are set in your production environment:
 
 ### Chat Not Responding
 
-- Verify Cerebras API key is set
+- Verify SambaNova API key is set
 - Check MongoDB vector index is created
 - Ensure documents have been successfully ingested
 
